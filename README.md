@@ -1,137 +1,154 @@
-# AI Video Editor & Rendering Studio
+# 🎬 Declarative AI Video Studio (Remotion × AI)
 
-A **free, AI-driven video creation and editing studio** built on [Remotion](https://remotion.dev). Describe a video or requesting edits in plain English, and your AI coding assistant (like Gemini or Claude) will write a validated JSON specification and render a polished MP4 video complete with transitions, kinetic text overlays, local voiceovers, stock B-roll, background music, and multiple aspect ratios—**100% locally, with $0 cost per render and no API keys required.**
-
----
-
-## 🚀 Quick Start (2-Minute Setup)
-
-1. **Install Dependencies**
-   Navigate to the app directory and run the setup script:
-   ```bash
-   cd app
-   ./setup.sh
-   ```
-   *This script validates Node, installs dependencies, ensures required asset directories, and copies the `.env` template.*
-
-2. **Render the Demo Video**
-   Render the default showcase video locally (takes ~10 seconds):
-   ```bash
-   npm run render
-   ```
-   Your finished video will be saved to: `public/output/video.mp4`
-
-3. **Launch the Visual Preview Studio**
-   View your video timeline in real-time and inspect properties visually:
-   ```bash
-   npm run dev
-   ```
-   Open the link in your browser to inspect or test your composition.
+A **free, local, developer-first video creation and editing studio** built on [Remotion](https://remotion.dev). Simply describe a video or request adjustments in plain English, and your AI coding assistant (like Gemini or Claude) will compile a validated JSON specification and render a polished MP4 video. Complete with kinetic text animations, automatic local voiceovers, stock B-roll, background music, and multiple aspect ratios—**100% locally, with $0 cost per render and no API keys required.**
 
 ---
 
-## 📊 Studio Architecture & Workflow
+## 📌 Executive Overview
 
-Here is how the AI Video Studio compiles high-quality videos from plain English prompts:
+| Metric | Rating / Detail |
+|---|---|
+| ⏰ **Setup Time** | ~2 Minutes |
+| 🟢 **Installation Difficulty** | Easy (Automated script) |
+| 🟡 **Usage Difficulty** | Easy (AI-guided prompts) to Intermediate (Custom React/JSX edits) |
+| 💵 **Cost per Render** | **$0.00** (Runs entirely on local CPU/GPU) |
+| 🛡️ **Privacy & Security** | 100% Local (Secrets never leave your machine; code is unlicensed/private by default) |
 
-### 1. Unified Project Workflow
+---
+
+## 🔍 What, Why, and Who
+
+### What is this project?
+This repository is a **declarative video rendering engine** that bridges the gap between text-based AI models and video generation. Instead of generating videos pixel-by-pixel (which is slow, low-resolution, and expensive), this project uses **React components** as the video elements and a **JSON file (`props.json`)** to define the timeline, text, layouts, transitions, and media assets. Your AI assistant acts as the editor by reading your prompt, updating the JSON spec, fetching free assets, and running the local renderer.
+
+### Why does this project exist?
+Traditional video editing has three major friction points:
+1. **Manual Labor**: Cutting clips, timing captions, and aligning transitions manually in timeline software (Premiere/After Effects) takes hours.
+2. **Aspect Ratios**: Re-editing a 16:9 horizontal video into 9:16 vertical and 1:1 square layouts requires rebuilding the layout from scratch.
+3. **Prohibitive AI Costs**: Standard text-to-video APIs (Sora, Runaway, Kling) charge high per-second premiums and offer minimal control over specific text edits or layout designs.
+
+This project solves this by using **Remotion's React-based compiler** to render files deterministically and instantly in any format from a single JSON specification.
+
+### Who is this project for?
+* **Content Creators & YouTubers** looking to automate short-form content (TikToks, Reels, Shorts) or video templates.
+* **Developers & Indie Hackers** who want to build SaaS applications that generate videos programmatically.
+* **AI Agencies & Marketers** looking to build high-volume video personalization campaigns (A/B testing ad variations).
+* **Teams** who want to generate on-brand video assets locally without sending private materials to cloud servers.
+
+---
+
+## 📊 System Architecture & Pipelines
+
+This studio operates via two key loops: the **Project Generation Loop** (how your prompts become specs) and the **Local Asset Pipeline** (how resources are compiled).
+
+### 1. Unified Prompt-to-Render Loop
 ```mermaid
 graph TD
-    A[Human Prompt / Brief] -->|Describe video in plain English| B(AI Agent / Developer)
+    A[Human Prompt / Instruction] -->|Describe video or request edits| B(AI Agent / Assistant)
     B -->|Generates / Patches| C[app/props.json]
-    C -->|Validate Schema| D{zod schema validation}
-    D -->|Passed| E[Asset Compilation Pipeline]
-    D -->|Failed| B
-    E -->|Remotion Compiler| F[Render output/video.mp4]
+    C -->|Validates Structure| D{Zod Schema Check}
+    D -->|Invalid Schema| B
+    D -->|Passed| E[Local Asset Pipeline]
+    E -->|Remotion Compiler| F[Render MP4 Video]
     F -->|Landscape / Portrait / Square| G[Finished Media Formats]
 ```
 
-### 2. Local Asset Pipeline (Keys Optional)
+### 2. Local Asset Pipeline (Zero Keys Required)
 ```mermaid
 graph TD
-    A[app/props.json Spec] --> B[Asset Engines]
-    B --> C[Local Kokoro-js] -->|TTS Voiceover Audio| F[manifest.json Cache]
-    B --> D[Whisper.cpp Local Build] -->|Karaoke Captions & Timing| F
-    B --> E[Stock B-Roll Pexels/Pixabay] -->|Cached Video Clips / Images| F
-    B --> G[Local Music Library] -->|Mood-Matched Background Track| F
+    A[app/props.json Spec] --> B[Asset Compilers]
+    B --> C[Local Kokoro-js Engine] -->|Narration Audio| F[Asset Cache & Manifest]
+    B --> D[Whisper.cpp Local Engine] -->|Word-Level Captions| F
+    B --> E[Stock API Pexels/Pixabay] -->|B-Roll Media Clips| F
+    B --> G[Local Music Library] -->|Mood-Matched Tracks| F
     F --> H[Remotion Renderer]
 ```
 
 ---
 
-## 🤖 Automating Video Production with AI Skills
+## 🛠️ Step-by-Step Installation
 
-This repository is pre-configured with **AI Agent Skills** so that your coding assistant knows exactly how to drive the video studio. The skills are located in the `.claude/skills/` and `.agents/skills/` directories.
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org) (v20 or v22 recommended) installed on your system.
 
-### Method 1: Pre-Configured Workspace (Recommended)
-By cloning this repository, the skills are already installed in your workspace. When you start an assistant session (like Antigravity or Claude Code), the assistant automatically discovers and activates the skills to perform tasks such as:
-- `/new-video` — Generates a new `props.json` spec based on a prompt.
-- `/edit-video` — Performs precise, non-destructive tweaks to individual scenes.
-- `/add-captions` — Feeds voiceover audio into Whisper to generate subtitles.
-- `/fetch-broll` — Uses Pexels/Pixabay stock queries to download media placeholders.
-
-### Method 2: Global Skill Registry
-If you are integrating this tool into another project, you can install the official Remotion skill using:
+### 1. Run Setup Script
+Navigate to the `app` directory and run the idempotent setup script. This script automatically checks your environment, installs dependencies, builds local folders, and sets up your environment template:
 ```bash
-npx skills add remotion-dev/skills
+cd app
+./setup.sh
 ```
-*This command pulls the latest best practices and scripts directly into your project's agent folder.*
+
+### 2. Render the Demo Video
+Run the local compilation command to test your installation. It takes about 10 seconds to compile and render:
+```bash
+npm run render
+```
+Your finished video file will be saved directly to: `public/output/video.mp4`
+
+### 3. Launch the Visual Preview Studio
+Launch the interactive web browser preview to see your composition's timeline, assets, and frames in real-time:
+```bash
+npm run dev
+```
+*Open the local URL displayed in your terminal (typically `http://localhost:3000`) to inspect your timeline visually.*
 
 ---
 
-## 📜 Collaborative Decision Logging
+## ⚡ Everyday Usage & Workflows
 
-When working with AI agents, keeping a clear history of decisions is critical. This project implements a strict logging rule:
+Once setup is complete, you can collaborate with an AI assistant (like Gemini or Claude) or run scripts manually to compile your specs:
 
-> **RULE:** Every non-trivial decision about the video (colors, fonts, scenes, music, aspect ratio), scope, or tooling must be recorded in [`DECISIONS.md`](./DECISIONS.md) at the repository root, chronological and newest first.
+### 1. Generate Voiceovers
+Write your narration text inside `props.json` (`scenes[].voiceover.text`) and generate local ONNX-powered voice files:
+```bash
+npm run tts
+```
 
-### Example log structure:
-```markdown
-## YYYY-MM-DD
-- **HH:MM** — Replaced heading font with Poppins for a cleaner editorial look.
-- **HH:MM** — Muted standard stock background tracks and switched to cozy lo-fi music.
+### 2. Generate Karaoke Captions
+Generate word-level timestamped captions by feeding the voiceover audio files into the local Whisper transcriber:
+```bash
+npm run captions
+```
+
+### 3. Fetch Stock Media (Optional)
+If you have set search terms in `props.json` (`scenes[].backgroundMedia.query`), fetch royalty-free stock clips automatically:
+```bash
+# Set PEXELS_API_KEY or PIXABAY_API_KEY in your local app/.env first
+npm run fetch-broll
+```
+
+### 4. Render Multiple Aspect Ratios
+Render your spec into Landscape (16:9), Portrait (9:16), and Square (1:1) formats at the same time:
+```bash
+npm run render:formats
 ```
 
 ---
 
-## 📁 File Structure
+## 📁 Repository Layout
 
 ```
-├── .agents/                    # Custom agent instructions & skills
-├── .claude/                    # Claude Code specific skills
-├── DECISIONS.md                # Shared developer/agent decision log
-├── README.md                   # Visual setup and architecture guide
-└── app/
-    ├── brand.json              # Active brand name, logo path, and palette
-    ├── props.json              # Active video composition specification
-    ├── setup.sh                # Idempotent developer setup script
-    ├── package.json            # Remotion studio dependencies
-    ├── public/
-    │   ├── input/              # Source clips, logos, and music
-    │   └── output/             # Rendered videos and stills
-    ├── scripts/                # Asset pipelines (TTS, Whisper, Stock fetch)
-    └── src/                    # Remotion React component compositions
+├── .agents/                    # Custom agent instructions & best practices
+├── .claude/                    # Claude Code specific workspace configurations
+├── app/                        # Main video application folder
+│   ├── brand.json              # Brand assets: palette colors, active typography, and logo
+│   ├── props.json              # Current video specification layout
+│   ├── setup.sh                # Main installation script
+│   ├── package.json            # Node.js dependencies & execution scripts
+│   ├── public/                 # Root asset folders
+│   │   ├── input/              # Source clips, logos, and lo-fi tracks
+│   │   └── output/             # Renders (ignored in Git history)
+│   ├── scripts/                # Asset generation scripts (TTS, Whisper, stock b-roll)
+│   └── src/                    # React components and rendering pipeline
+├── DECISIONS.md                # Local developer logging history (private)
+└── README.md                   # Main architecture and setup guide
 ```
 
 ---
 
-## 🛠️ Customization: Brand Colors & Fonts
+## ⚖️ License
 
-To customize the video style, simply edit `app/brand.json`. Remotion will automatically update all background gradients, card containers, and titles:
+This repository is **private and unlicensed** by default (`"license": "UNLICENSED"`, `"private": true` inside [app/package.json](file:///Users/sajon/StudioProjects/ai_video_editor/app/package.json)). 
 
-```json
-{
-  "name": "My Brand Name",
-  "palette": {
-    "primary": "#4f46e5",
-    "secondary": "#06b6d4",
-    "background": "#0f172a",
-    "text": "#f8fafc"
-  },
-  "fonts": {
-    "heading": "Poppins",
-    "body": "DMSans"
-  }
-}
-```
-For the full schema reference and listing of all CLI render options, see [`app/README.md`](./app/README.md) and [`app/CLAUDE.md`](./app/CLAUDE.md).
+* You are free to customize, host, and push this repository to your own public/private GitHub profiles.
+* If you plan to distribute this package for public npm usage, remove the `"private": true` property and set an open-source license (such as MIT) in your package files.
