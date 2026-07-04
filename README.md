@@ -21,6 +21,13 @@ A **free, local, developer-first video creation and editing studio** built on [R
 ### What is this project?
 This repository is a **declarative video rendering engine** that bridges the gap between text-based AI models and video generation. Instead of generating videos pixel-by-pixel (which is slow, low-resolution, and expensive), this project uses **React components** as the video elements and a **JSON file (`props.json`)** to define the timeline, text, layouts, transitions, and media assets. Your AI assistant acts as the editor by reading your prompt, updating the JSON spec, fetching free assets, and running the local renderer.
 
+#### 💻 Tech Stack & Programming Languages
+This project is built using a modern TypeScript/React web development stack (not Flutter/Dart):
+* **React (TypeScript / TSX)**: Defines the layout, scenes, typography, and styling components.
+* **Remotion**: The core engine compilation pipeline that translates React components into frames and renders them to MP4.
+* **Node.js**: Powers the asset automation scripts (Text-to-Speech audio, Whisper subtitle transcription, and stock media scraping).
+* **Tailwind CSS**: Provides the modern visual design utilities, gradients, and cards.
+
 ### Why does this project exist?
 Traditional video editing has three major friction points:
 1. **Manual Labor**: Cutting clips, timing captions, and aligning transitions manually in timeline software (Premiere/After Effects) takes hours.
