@@ -21,6 +21,11 @@ A **free, local, developer-first video creation and editing studio** built on [R
 ### What is this project?
 This repository is a **declarative video rendering engine** that bridges the gap between text-based AI models and video generation. Instead of generating videos pixel-by-pixel (which is slow, low-resolution, and expensive), this project uses **React components** as the video elements and a **JSON file (`props.json`)** to define the timeline, text, layouts, transitions, and media assets. Your AI assistant acts as the editor by reading your prompt, updating the JSON spec, fetching free assets, and running the local renderer.
 
+> [!IMPORTANT]
+> **AI Video Editing vs. AI Video Generation**:
+> This project is an **AI-assisted declarative editor, not a generative AI video tool**. It **does not** synthetically generate brand new visual pixels or creative scenes from scratch (like Sora, Runway, or Kling). Instead, it takes your **existing media assets** (video clips, photos, music, voiceovers) and automates the layout compiling, cutting, transition rendering, kinetic captioning, and brand styling based on your text prompt.
+
+
 #### 💻 Tech Stack & Programming Languages
 This project is built using a modern TypeScript/React web development stack (not Flutter/Dart):
 * **React (TypeScript / TSX)**: Defines the layout, scenes, typography, and styling components.
