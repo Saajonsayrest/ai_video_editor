@@ -143,6 +143,19 @@ npm run render:formats
 
 ---
 
+## 📥 Asset Management: Inputs & Outputs
+
+All media files must be stored in the local file structure under the `app/public/` directory:
+
+* **Input Assets (`app/public/input/`)**: 
+  * Put all your raw video clips, images, brand logos, custom fonts, and audio tracks in this folder.
+  * Your JSON specification (`props.json`) references these files relative to this folder (e.g., `"src": "input/my-logo.png"`).
+* **Rendered Outputs (`app/public/output/`)**: 
+  * Your final compiled video files (like `video.mp4`) and single-frame thumbnail images are rendered here.
+  * **Note**: The entire content of the `public/output/` folder is git-ignored, meaning your renders will never clutter your GitHub repository.
+
+---
+
 ## 📁 Repository Layout
 
 ```
