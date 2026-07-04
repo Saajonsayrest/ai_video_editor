@@ -1,0 +1,19 @@
+{
+  "name": "Acme Studio",
+  "logo": "",
+  "tagline": "Stunning videos, automatically.",
+  "palette": {
+    "primary": "#4f46e5",
+    "secondary": "#06b6d4",
+    "background": "#0f172a",
+    "surface": "#1e293b",
+    "text": "#f8fafc",
+    "muted": "#94a3b8",
+    "accent": "#38bdf8"
+  },
+  "fonts": {
+    "heading": "Poppins",
+    "body": "DMSans"
+  },
+  "voice": "af_heart"
+}

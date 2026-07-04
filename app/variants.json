@@ -1,0 +1,7 @@
+{
+  "base": "props.json",
+  "variants": [
+    { "name": "demo-square", "patch": { "format": "square", "width": 1080, "height": 1080 } },
+    { "name": "demo-portrait", "patch": { "format": "portrait", "width": 1080, "height": 1350 } }
+  ]
+}

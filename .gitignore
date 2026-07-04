@@ -1,0 +1,9 @@
+# OS / editor junk
+.DS_Store
+*.log
+
+# Never commit dependencies or secrets (app/.gitignore also covers the app subtree)
+node_modules/
+**/node_modules/
+.env
+**/.env

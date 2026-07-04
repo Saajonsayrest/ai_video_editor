@@ -1,0 +1,32 @@
+{
+  "tracks": [
+    {
+      "file": "Carefree_KevinMacLeod.mp3",
+      "mood": "cozy cute warm uplifting cottagecore gentle",
+      "genre": "acoustic ukulele",
+      "bpm": 108,
+      "source": "Kevin MacLeod / incompetech.com",
+      "url": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3",
+      "license": "CC-BY 4.0 — free with credit: 'Carefree' Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 4.0",
+      "credit": "\"Carefree\" Kevin MacLeod (incompetech.com) — CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/"
+    }
+  ],
+  "_help": "Add each track file to this folder and describe it here so Claude can pick by mood. Example entry: { \"file\": \"upbeat-corporate.mp3\", \"mood\": \"upbeat energetic\", \"genre\": \"corporate\", \"bpm\": 120, \"source\": \"Pixabay Music\", \"license\": \"Pixabay Content License\" }",
+  "sources": [
+    {
+      "name": "Pixabay Music",
+      "url": "https://pixabay.com/music/",
+      "license": "Pixabay Content License — free, commercial use, no attribution required"
+    },
+    {
+      "name": "YouTube Audio Library",
+      "url": "https://studio.youtube.com (Audio Library)",
+      "license": "Varies per track — many free for commercial use; some require attribution. Check each."
+    },
+    {
+      "name": "Kevin MacLeod / incompetech",
+      "url": "https://incompetech.com/music/royalty-free/",
+      "license": "CC-BY 4.0 — free with credit"
+    }
+  ]
+}
