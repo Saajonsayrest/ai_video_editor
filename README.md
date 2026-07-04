@@ -1,6 +1,6 @@
 # 🎬 Declarative AI Video Studio (Remotion × AI)
 
-A **free, local, developer-first video creation and editing studio** built on [Remotion](https://remotion.dev). Simply describe a video or request adjustments in plain English, and your AI coding assistant (like Gemini or Claude) will compile a validated JSON specification and render a polished MP4 video. Complete with kinetic text animations, automatic local voiceovers, stock B-roll, background music, and multiple aspect ratios—**100% locally, with $0 cost per render and no API keys required.**
+A **free, local, developer-first video creation and editing studio** built on [Remotion](https://remotion.dev). Simply describe a video or request adjustments in plain English, and your AI coding assistant (such as **Antigravity**, **Codex**, or **Claude**) will compile a validated JSON specification and render a polished MP4 video. Complete with kinetic text animations, automatic local voiceovers, stock B-roll, background music, and multiple aspect ratios—**100% locally, with $0 cost per render and no API keys required.**
 
 ---
 
@@ -94,9 +94,20 @@ npm run dev
 
 ---
 
+## 🤖 AI-Agent Integration (Antigravity, Codex, Claude)
+
+This repository is pre-configured with **AI Agent Skills** so that your coding assistant knows exactly how to drive the video studio out of the box:
+* 🎯 **Antigravity**: Seamlessly executes video generation, asset configuration, and code edits.
+* 🧠 **Codex**: Drives programmatic timeline updates and React component modifications.
+* ⚡ **Claude (Claude Code / CLI)**: Reads the local context, patches `props.json` specifications, and triggers renders.
+
+The pre-bundled workspace rules and skills (located in `.agents/skills/` and `.claude/skills/`) automatically guide these AI agents to execute non-destructive editing workflows on your behalf.
+
+---
+
 ## ⚡ Everyday Usage & Workflows
 
-Once setup is complete, you can collaborate with an AI assistant (like Gemini or Claude) or run scripts manually to compile your specs:
+Once setup is complete, you can collaborate with your AI assistant or run scripts manually to compile your specs:
 
 ### 1. Generate Voiceovers
 Write your narration text inside `props.json` (`scenes[].voiceover.text`) and generate local ONNX-powered voice files:
