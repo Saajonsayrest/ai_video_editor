@@ -1,9 +1,164 @@
-# OS / editor junk
-.DS_Store
-*.log
+# ==============================================================================
+# Git Exclusion Rules — Strict Privacy & Media Isolation
+# ==============================================================================
 
-# Never commit dependencies or secrets (app/.gitignore also covers the app subtree)
+# OS & Editor Artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# AI Assistant Memory & Conversation Logs
+.ai-brain/
+**/.ai-brain/
+
+# Dependencies, Virtualenvs, & Local AI Models
 node_modules/
 **/node_modules/
-.env
-**/.env
+.pyenv/
+**/.pyenv/
+whisper.cpp/
+**/whisper.cpp/
+
+# Secrets, Environment Variables, & Certificates
+.env*
+**/.env*
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+
+# ------------------------------------------------------------------------------
+# User Media, Images, & Documents (Global Rule: Never commit media/docs to Git)
+# ------------------------------------------------------------------------------
+
+# Video formats
+*.mp4
+*.mov
+*.avi
+*.webm
+*.mkv
+*.m4v
+*.flv
+*.wmv
+*.3gp
+*.mts
+*.m2ts
+*.vob
+
+# Audio formats
+*.wav
+*.mp3
+*.aac
+*.flac
+*.m4a
+*.ogg
+*.opus
+*.aiff
+*.aif
+*.wma
+*.m4p
+
+# Image formats
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
+*.heif
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.svg
+*.ico
+*.avif
+
+# Camera RAW & High-Res Formats
+*.raw
+*.dng
+*.cr2
+*.cr3
+*.nef
+*.arw
+*.rw2
+*.orf
+*.pef
+*.raf
+
+# Documents & Data files
+*.pdf
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.xls
+*.xlsx
+*.csv
+
+# Design & Vector formats
+*.psd
+*.ai
+*.eps
+*.sketch
+*.fig
+*.xd
+
+# Archive formats
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.bz2
+*.xz
+*.tgz
+
+# Subtitle & Transcription Files
+*.srt
+*.vtt
+
+# Working State & Generated Specifications (Session data)
+props.json
+**/props.json
+props_*.json
+**/props_*.json
+project.json
+**/project.json
+karaoke-props.json
+**/karaoke-props.json
+dub-script.json
+**/dub-script.json
+manifest.json
+**/manifest.json
+
+# ------------------------------------------------------------------------------
+# Input & Output Storage (Completely isolated, preserving only .gitkeep & docs)
+# ------------------------------------------------------------------------------
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+temp/*
+!temp/.gitkeep
+tmp/*
+!tmp/.gitkeep
+
+app/public/input/*
+!app/public/input/.gitkeep
+app/public/input/music/*
+!app/public/input/music/.gitkeep
+!app/public/input/music/README.md
+!app/public/input/music/music-manifest.json
+app/public/output/*
+!app/public/output/.gitkeep

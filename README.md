@@ -1,6 +1,6 @@
 # 🎬 Declarative AI Video Studio (Remotion × AI)
 
-A **free, local, developer-first video creation and editing studio** built on [Remotion](https://remotion.dev). Simply describe a video or request adjustments in plain English, and your AI coding assistant (such as **Antigravity**, **Codex**, or **Claude**) will compile a validated JSON specification and render a polished MP4 video. Complete with kinetic text animations, automatic local voiceovers, stock B-roll, background music, and multiple aspect ratios—**100% locally, with $0 cost per render and no API keys required.**
+A **free, local, developer-first video creation and editing studio** built on [Remotion](https://remotion.dev). Simply describe a video or request adjustments in plain English, and your AI coding assistant (such as **Antigravity**, **Gemini**, **Codex**, or **Claude**) will compile a validated JSON specification and render a polished MP4 video. Complete with kinetic text animations, automatic local voiceovers, stock B-roll, background music, audio mastering, stem separation, AI dubbing, inpainting, and multiple aspect ratios—**100% locally, with $0 cost per render and no API keys required.**
 
 ---
 
@@ -9,89 +9,64 @@ A **free, local, developer-first video creation and editing studio** built on [R
 | Metric | Rating / Detail |
 |---|---|
 | ⏰ **Setup Time** | ~2 Minutes |
-| 🟢 **Installation Difficulty** | Easy (Automated script) |
+| 🟢 **Installation Difficulty** | Easy (Automated idempotent setup script) |
 | 🟡 **Usage Difficulty** | Easy (AI-guided prompts) to Intermediate (Custom React/JSX edits) |
 | 💵 **Cost per Render** | **$0.00** (Runs entirely on local CPU/GPU) |
-| 🛡️ **Privacy & Security** | 100% Local (Secrets never leave your machine; code is unlicensed/private by default) |
+| 🛡️ **Privacy & Security** | 100% Local & Isolated (User media, inputs, and outputs are strictly git-ignored) |
 
 ---
 
-## 🔍 What, Why, and Who
+## 🔍 Features & Capabilities
 
-### What is this project?
-This repository is a **declarative video rendering engine** that bridges the gap between text-based AI models and video generation. Instead of generating videos pixel-by-pixel (which is slow, low-resolution, and expensive), this project uses **React components** as the video elements and a **JSON file (`props.json`)** to define the timeline, text, layouts, transitions, and media assets. Your AI assistant acts as the editor by reading your prompt, updating the JSON spec, fetching free assets, and running the local renderer.
+### 1. Declarative Video Editing & Kinetic Typography
+- **Deterministic Renders**: Every render is driven by a single validated JSON specification (`props.json`).
+- **Scene Kinds**: `hook`, `media`, `product`, `quote`, `stat`, `comparison`, `audioviz`, `cta`.
+- **Text Animations**: `slide-up`, `spring-in`, `typewriter`, `word-highlight`, `stagger-reveal`, `fisheye`, `fade`.
+- **Media Controls**: Ken Burns motion for stills and video, `cropOffsetY`, `blurFill`, filters, and scrims.
 
-> [!IMPORTANT]
-> **AI Video Editing vs. AI Video Generation**:
-> This project is an **AI-assisted declarative editor, not a generative AI video tool**. It **does not** synthetically generate brand new visual pixels or creative scenes from scratch (like Sora, Runway, or Kling). Instead, it takes your **existing media assets** (video clips, photos, music, voiceovers) and automates the layout compiling, cutting, transition rendering, kinetic captioning, and brand styling based on your text prompt.
+### 2. Audio Processing & Mastering Toolkit
+- **Loudness Normalization**: Single-pass `-16 LUFS` social audio mastering (`npm run audio -- loudnorm`).
+- **Dynamic Fades & Transitions**: Smooth frame-interpolated audio fades.
+- **Voice-Ducking**: Auto-duck background music beneath voiceovers.
+- **Speed & Fitting**: Tempo shifts (`atempo`) and duration padding/clamping without pitch distortion.
 
+### 3. Vocal & Instrumental Stem Separation
+- **Demucs Separation**: Extract isolated vocals and instrumental backing tracks locally via on-demand Python virtualenvs.
+- **Karaoke Mode**: Transform any song or video into a sing-along track with synchronized word-highlight captions (`npm run karaoke`).
 
-#### 💻 Tech Stack & Programming Languages
-This project is built using a modern TypeScript/React web development stack (not Flutter/Dart):
-* **React (TypeScript / TSX)**: Defines the layout, scenes, typography, and styling components.
-* **Remotion**: The core engine compilation pipeline that translates React components into frames and renders them to MP4.
-* **Node.js**: Powers the asset automation scripts (Text-to-Speech audio, Whisper subtitle transcription, and stock media scraping).
-* **Tailwind CSS**: Provides the modern visual design utilities, gradients, and cards.
+### 4. Multilingual AI Dubbing Pipeline
+- **Extract & Translate**: Transcribe footage into natural sentence segments, fill translations in-session, and re-voice with local neural TTS (Kokoro for English, Piper for Nepali/Hindi).
+- **Time-Fitting & Muxing**: Automatically fits synthesized speech into original timing slots and mixes over the instrumental track.
 
-### Why does this project exist?
-Traditional video editing has three major friction points:
-1. **Manual Labor**: Cutting clips, timing captions, and aligning transitions manually in timeline software (Premiere/After Effects) takes hours.
-2. **Aspect Ratios**: Re-editing a 16:9 horizontal video into 9:16 vertical and 1:1 square layouts requires rebuilding the layout from scratch.
-3. **Prohibitive AI Costs**: Standard text-to-video APIs (Sora, Runaway, Kling) charge high per-second premiums and offer minimal control over specific text edits or layout designs.
-
-This project solves this by using **Remotion's React-based compiler** to render files deterministically and instantly in any format from a single JSON specification.
-
-### Who is this project for?
-* **Content Creators & YouTubers** looking to automate short-form content (TikToks, Reels, Shorts) or video templates.
-* **Developers & Indie Hackers** who want to build SaaS applications that generate videos programmatically.
-* **AI Agencies & Marketers** looking to build high-volume video personalization campaigns (A/B testing ad variations).
-* **Teams** who want to generate on-brand video assets locally without sending private materials to cloud servers.
+### 5. Media Ingestion & AI Inpainting
+- **yt-dlp Video Ingestion**: Download footage and extract clean audio tracks with license provenance tracking (`npm run ingest`).
+- **Object & Watermark Removal**: Local AI inpainting powered by IOPaint and LaMa checkpoint (`npm run edit-image`).
 
 ---
 
-## 📊 System Architecture & Pipelines
+## 🛡️ Strict Privacy & Git Protection
 
-This studio operates via two key loops: the **Project Generation Loop** (how your prompts become specs) and the **Local Asset Pipeline** (how resources are compiled).
-
-### 1. Unified Prompt-to-Render Loop
-```mermaid
-graph TD
-    A[Human Prompt / Instruction] -->|Describe video or request edits| B(AI Agent / Assistant)
-    B -->|Generates / Patches| C[app/props.json]
-    C -->|Validates Structure| D{Zod Schema Check}
-    D -->|Invalid Schema| B
-    D -->|Passed| E[Local Asset Pipeline]
-    E -->|Remotion Compiler| F[Render MP4 Video]
-    F -->|Landscape / Portrait / Square| G[Finished Media Formats]
-```
-
-### 2. Local Asset Pipeline (Zero Keys Required)
-```mermaid
-graph TD
-    A[app/props.json Spec] --> B[Asset Compilers]
-    B --> C[Local Kokoro-js Engine] -->|Narration Audio| F[Asset Cache & Manifest]
-    B --> D[Whisper.cpp Local Engine] -->|Word-Level Captions| F
-    B --> E[Stock API Pexels/Pixabay] -->|B-Roll Media Clips| F
-    B --> G[Local Music Library] -->|Mood-Matched Tracks| F
-    F --> H[Remotion Renderer]
-```
+This repository is designed for clean public GitHub showcases and CV/portfolio profiles while handling sensitive temporary custom video editing locally:
+* **All input and output media** (`input/`, `output/`, `app/public/input/`, `app/public/output/`) are strictly git-ignored.
+* **All video/audio formats** (`*.mp4`, `*.mov`, `*.wav`, `*.mp3`, etc.), working session files (`props.json`, `dub-script.json`, `karaoke-props.json`, `project.json`), and `.pyenv/` virtual environments are excluded from git.
+* Only clean code, components, templates, and documentation are tracked.
 
 ---
 
 ## 🛠️ Step-by-Step Installation
 
 ### Prerequisites
-Make sure you have [Node.js](https://nodejs.org) (v20 or v22 recommended) installed on your system.
+Make sure you have [Node.js](https://nodejs.org) (v20 or v22 LTS recommended) installed.
 
 ### 1. Run Setup Script
-Navigate to the `app` directory and run the idempotent setup script. This script automatically checks your environment, installs dependencies, builds local folders, and sets up your environment template:
+Navigate to the `app` directory and run the setup script:
 ```bash
 cd app
 ./setup.sh
 ```
 
 ### 2. Render the Demo Video
-Run the local compilation command to test your installation. It takes about 10 seconds to compile and render:
+Run the local compilation command to test your installation:
 ```bash
 npm run render
 ```
@@ -102,81 +77,68 @@ Launch the interactive web browser preview to see your composition's timeline, a
 ```bash
 npm run dev
 ```
-*Open the local URL displayed in your terminal (typically `http://localhost:3000`) to inspect your timeline visually.*
 
 ---
 
-## 🤖 AI-Agent Integration (Antigravity, Codex, Claude)
+## ⚡ Command Reference
 
-This repository is pre-configured with **AI Agent Skills** so that your coding assistant knows exactly how to drive the video studio out of the box:
-* 🎯 **Antigravity**: Seamlessly executes video generation, asset configuration, and code edits.
-* 🧠 **Codex**: Drives programmatic timeline updates and React component modifications.
-* ⚡ **Claude (Claude Code / CLI)**: Reads the local context, patches `props.json` specifications, and triggers renders.
-
-The pre-bundled workspace rules and skills (located in `.agents/skills/` and `.claude/skills/`) automatically guide these AI agents to execute non-destructive editing workflows on your behalf.
-
----
-
-## ⚡ Everyday Usage & Workflows
-
-Once setup is complete, you can collaborate with your AI assistant or run scripts manually to compile your specs:
-
-### 1. Generate Voiceovers
-Write your narration text inside `props.json` (`scenes[].voiceover.text`) and generate local ONNX-powered voice files:
-```bash
-npm run tts
-```
-
-### 2. Generate Karaoke Captions
-Generate word-level timestamped captions by feeding the voiceover audio files into the local Whisper transcriber:
-```bash
-npm run captions
-```
-
-### 3. Fetch Stock Media (Optional)
-If you have set search terms in `props.json` (`scenes[].backgroundMedia.query`), fetch royalty-free stock clips automatically:
-```bash
-# Set PEXELS_API_KEY or PIXABAY_API_KEY in your local app/.env first
-npm run fetch-broll
-```
-
-### 4. Render Multiple Aspect Ratios
-Render your spec into Landscape (16:9), Portrait (9:16), and Square (1:1) formats at the same time:
-```bash
-npm run render:formats
-```
+| Command | What it does |
+|---|---|
+| `npm run validate` | Zod-check `props.json` (no render); prints duration/size |
+| `npm run render` | Render `props.json` → `public/output/video.mp4` |
+| `npm run render:formats` | Render same spec to landscape (16:9), portrait (9:16), square (1:1) + thumbnails |
+| `npm run batch -- variants.json` | A/B: render N patched variants + thumbnails |
+| `npm run still -- <frame> [out.png]` | Single-frame PNG (thumbnail/OG image) |
+| `npm run tts [-- --engine say]` | Fill `voiceover.text` → cached VO audio (local Kokoro TTS) |
+| `npm run captions` | Whisper transcription of VO/footage → karaoke captions or export `.srt`/`.vtt` |
+| `npm run fetch-broll` | Stock photos/video from Pexels/Pixabay → local cache |
+| `npm run ingest -- <url>` | Download video (yt-dlp) → mp4 + wav under `public/input/ingest/` |
+| `npm run music` | Fill `music.src` from `music.mood` using the local music library |
+| `npm run audio -- <op> …` | Mix, loudnorm, fade, atempo, trim, duck, concat, stems |
+| `npm run karaoke -- <file> [--instrumental]` | Any video/song → ready-to-render karaoke spec |
+| `npm run dub -- extract\|synthesize` | Dub a video into en/ne/hi (or subtitle generation) |
+| `npm run silence -- input/clip.mp4` | Detect silence → suggested trims / splice ranges |
+| `npm run ffmpeg -- <args>` | Bundled ffmpeg passthrough (cut/concat/convert) |
+| `npm run edit-image -- input/x.jpg input/mask.png` | Inpainting object/watermark removal via IOPaint |
+| `npm run dev` / `npm run preview` | Remotion Studio (demo / `props.json`) |
+| `npm run lint` | ESLint + TypeScript typecheck |
 
 ---
 
-## 📥 Asset Management: Inputs & Outputs
+## 🤖 AI-Agent Integration
 
-All media files must be stored in the local file structure under the `app/public/` directory:
-
-* **Input Assets (`app/public/input/`)**: 
-  * Put all your raw video clips, images, brand logos, custom fonts, and audio tracks in this folder.
-  * Your JSON specification (`props.json`) references these files relative to this folder (e.g., `"src": "input/my-logo.png"`).
-* **Rendered Outputs (`app/public/output/`)**: 
-  * Your final compiled video files (like `video.mp4`) and single-frame thumbnail images are rendered here.
-  * **Note**: The entire content of the `public/output/` folder is git-ignored, meaning your renders will never clutter your GitHub repository.
+Pre-configured skills exist in `.agents/skills/` and `.claude/skills/`:
+* 🎯 `/new-video`: Declarative prompt-to-video generation.
+* ✍️ `/edit-video`: Surgical timeline patching & asset reuse.
+* 🎙️ `/add-captions`: TikTok-style karaoke captions & subtitle exports.
+* 🌐 `/dub-video`: Multilingual video dubbing & translation.
+* 🖼️ `/edit-image`: AI inpainting & watermark removal.
+* 📥 `/ingest-video`: Free video download via yt-dlp.
+* 🎬 `/make-ads`: Multi-format ad variants & batch rendering.
+* 🎞️ `/fetch-broll`: Royalty-free stock media fetching.
 
 ---
 
 ## 📁 Repository Layout
 
 ```
-├── .agents/                    # Custom agent instructions & best practices
-├── .claude/                    # Claude Code specific workspace configurations
+├── .agents/                    # Multi-agent skill bindings (Antigravity/Gemini/Codex)
+├── .claude/                    # Claude Code skill bindings
+├── docs/                       # Architectural documentation
+├── input/                      # Root input directory (.gitkeep)
+├── output/                     # Root output directory (.gitkeep)
 ├── app/                        # Main video application folder
-│   ├── brand.json              # Brand assets: palette colors, active typography, and logo
+│   ├── brand.json              # Brand palette, active typography, and logo configuration
 │   ├── props.json              # Current video specification layout
 │   ├── setup.sh                # Main installation script
 │   ├── package.json            # Node.js dependencies & execution scripts
 │   ├── public/                 # Root asset folders
-│   │   ├── input/              # Source clips, logos, and lo-fi tracks
-│   │   └── output/             # Renders (ignored in Git history)
-│   ├── scripts/                # Asset generation scripts (TTS, Whisper, stock b-roll)
-│   └── src/                    # React components and rendering pipeline
-├── DECISIONS.md                # Local developer logging history (private)
+│   │   ├── input/              # Source clips, music, ingest, stems (git-ignored)
+│   │   └── output/             # Rendered videos and thumbnails (git-ignored)
+│   ├── scripts/                # Video studio scripts & adapter tools
+│   │   └── lib/                # Modular adapters (audio, stems, dub, captions, tts, ingest, pyenv)
+│   └── src/                    # React components, schemas, and Remotion rendering pipeline
+├── DECISIONS.md                # Decision log
 └── README.md                   # Main architecture and setup guide
 ```
 
@@ -184,7 +146,4 @@ All media files must be stored in the local file structure under the `app/public
 
 ## ⚖️ License
 
-This repository is **private and unlicensed** by default (`"license": "UNLICENSED"`, `"private": true` inside [app/package.json](file:///Users/sajon/StudioProjects/ai_video_editor/app/package.json)). 
-
-* You are free to customize, host, and push this repository to your own public/private GitHub profiles.
-* If you plan to distribute this package for public npm usage, remove the `"private": true` property and set an open-source license (such as MIT) in your package files.
+This repository is **private and unlicensed** by default (`"license": "UNLICENSED"`, `"private": true` inside `app/package.json`).

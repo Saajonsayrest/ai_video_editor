@@ -2,7 +2,8 @@ import fs from "fs";
 import path from "path";
 import { videoSchema, type Format } from "../src/schema";
 import { defaultVideo } from "../src/default-video";
-import { bundleProject, renderThumbnail, renderVideo } from "./lib/renderer";
+import brandJson from "../brand.json";
+import { backupExisting, bundleProject, renderThumbnail, renderVideo } from "./lib/renderer";
 
 /**
  * Render the SAME spec to all three formats — 16:9, 9:16, 1:1 — plus a thumbnail
@@ -17,7 +18,10 @@ async function main() {
   const root = process.cwd();
   const propsPath = path.join(root, "props.json");
   const base = fs.existsSync(propsPath)
-    ? videoSchema.parse(JSON.parse(fs.readFileSync(propsPath, "utf8")))
+    ? videoSchema.parse({
+        brand: brandJson,
+        ...JSON.parse(fs.readFileSync(propsPath, "utf8")),
+      })
     : defaultVideo;
 
   console.log("Bundling…");
@@ -28,18 +32,12 @@ async function main() {
   for (const format of FORMATS) {
     const inputProps = { ...base, format } as unknown as Record<string, unknown>;
     console.log(`\n▶ ${format}`);
-    const info = await renderVideo(
-      serveUrl,
-      inputProps,
-      path.join(outDir, `video-${format}.mp4`),
-      `${format} `,
-    );
-    await renderThumbnail(
-      serveUrl,
-      inputProps,
-      path.join(outDir, `video-${format}.png`),
-      Math.floor(info.durationInFrames / 3),
-    );
+    const videoPath = path.join(outDir, `video-${format}.mp4`);
+    const stillPath = path.join(outDir, `video-${format}.png`);
+    backupExisting(videoPath);
+    backupExisting(stillPath);
+    const info = await renderVideo(serveUrl, inputProps, videoPath, `${format} `);
+    await renderThumbnail(serveUrl, inputProps, stillPath, Math.floor(info.durationInFrames / 3));
     console.log(
       `  ✓ ${info.width}×${info.height}, ${info.durationInFrames}f → public/output/video-${format}.mp4 (+ .png)`,
     );

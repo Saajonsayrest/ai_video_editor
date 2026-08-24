@@ -21,9 +21,9 @@ function kenBurnsStyle(
   });
   switch (kind) {
     case "zoom-in":
-      return { scale: 1 + 0.12 * p };
+      return { scale: 1 + 0.06 * p };
     case "zoom-out":
-      return { scale: 1.12 - 0.12 * p };
+      return { scale: 1.06 - 0.06 * p };
     case "pan-left":
       return { scale: 1.1, translate: `${interpolate(p, [0, 1], [3, -3])}% 0%` };
     case "pan-right":
@@ -75,7 +75,7 @@ const Scrim: React.FC<{ amount: number }> = ({ amount }) =>
       style={{
         position: "absolute",
         inset: 0,
-        background: `linear-gradient(180deg, rgba(0,0,0,${amount * 0.4}), rgba(0,0,0,${amount}))`,
+        background: `linear-gradient(180deg, rgba(0,0,0,${amount * 0.85}) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 65%, rgba(0,0,0,${amount}) 100%)`,
       }}
     />
   ) : null;
@@ -103,6 +103,8 @@ export const SceneBackground: React.FC<{
       trimAfter: framesOrUndef(media.trimEnd, fps),
     };
     const kb = videoKenBurns(media.kenBurns, frame, sceneFrames);
+    const [kbTranslateX] = kb.translate.split(" ");
+    const translate = `${kbTranslateX} ${media.cropOffsetY}%`;
     // blurFill: a blurred, over-scaled cover copy fills the whole frame (so a
     // landscape source never leaves bare bands in a vertical comp), with a sharp,
     // contained + graded copy seated on top. Both decode the same frames, so they
@@ -137,7 +139,7 @@ export const SceneBackground: React.FC<{
               objectFit: "contain",
               objectPosition: media.objectPosition,
               scale: media.fillZoom * kb.scale,
-              translate: kb.translate,
+              translate,
               opacity: media.opacity,
               filter: media.filter || undefined,
             }}
@@ -156,7 +158,7 @@ export const SceneBackground: React.FC<{
           style={{
             ...style,
             scale: kb.scale,
-            translate: kb.translate,
+            translate,
             filter: media.filter || undefined,
           }}
         />
@@ -231,6 +233,8 @@ const LOGO_POS: Record<SceneProps["logoPosition"], React.CSSProperties> = {
   "top-right": { top: "5%", right: "5%" },
   "bottom-left": { bottom: "5%", left: "5%" },
   "bottom-right": { bottom: "5%", right: "5%" },
+  "center": { top: "50%", left: "50%", transform: "translate(-50%, -50%)" },
+  "top-center": { top: "15%", left: "50%", transform: "translate(-50%, 0)" },
 };
 
 export const SceneForeground: React.FC<{ scene: SceneProps }> = ({ scene }) => {

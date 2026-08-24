@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { videoSchema } from "../src/schema";
 import { defaultVideo } from "../src/default-video";
+import brandJson from "../brand.json";
 import { bundleProject, renderThumbnail, renderVideo } from "./lib/renderer";
 
 /**
@@ -57,6 +58,11 @@ async function main() {
     base = batch.base;
   } else if (fs.existsSync(path.join(root, "props.json"))) {
     base = JSON.parse(fs.readFileSync(path.join(root, "props.json"), "utf8"));
+  }
+  // brand.json is the fallback for a base that omits "brand" — deepMerge lets
+  // an explicit "brand" in that base still win.
+  if (base !== defaultVideo) {
+    base = deepMerge({ brand: brandJson }, base);
   }
 
   console.log("Bundling…");

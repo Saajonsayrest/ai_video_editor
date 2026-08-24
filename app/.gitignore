@@ -1,14 +1,59 @@
-node_modules
-dist
+# ==============================================================================
+# App Subtree Git Exclusion Rules
+# ==============================================================================
+
+node_modules/
+dist/
 .DS_Store
-.env
+.env*
 
 # Local whisper.cpp build + models (downloaded on first `npm run captions`)
-whisper.cpp
+whisper.cpp/
 
-# Local working state (derived per session)
+# On-demand Python venvs for demucs / IOPaint / piper-tts (built on first use)
+.pyenv/
+
+# Local working state & session files
 props.json
+props_*.json
 project.json
+karaoke-props.json
+dub-script.json
+manifest.json
+
+# Temporary directories
+tmp/
+temp/
+
+# Subtitle exports
+*.srt
+*.vtt
+
+# Media, Images, & Documents
+*.mp4
+*.mov
+*.avi
+*.webm
+*.mkv
+*.wav
+*.mp3
+*.aac
+*.flac
+*.m4a
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
+*.heif
+*.gif
+*.bmp
+*.tiff
+*.svg
+*.pdf
+*.zip
+*.tar
+*.gz
 
 # Never commit media: ignore ALL contents of the input/output folders,
 # but keep the (empty) folders in git via .gitkeep.
@@ -16,6 +61,7 @@ public/input/*
 public/output/*
 !public/input/.gitkeep
 !public/output/.gitkeep
+
 # Keep the music library manifest + docs (but not the audio files themselves).
 !public/input/music/
 public/input/music/*

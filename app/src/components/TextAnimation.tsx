@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Easing,
   interpolate,
@@ -90,6 +91,166 @@ const WordHighlight: React.FC<{
   );
 };
 
+const StaggeredReveal: React.FC<{
+  text: string;
+  delay: number;
+  style?: React.CSSProperties;
+}> = ({ text, delay, style }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const words = text.split(" ");
+  const isCentered = style?.textAlign === "center";
+
+  return (
+    <div
+      style={{
+        ...style,
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: isCentered ? "center" : "flex-start",
+        rowGap: "0.2em",
+        columnGap: "0.28em",
+      }}
+    >
+      {words.map((word, i) => {
+        const wordDelay = delay + i * 3.5;
+        const p = spring({
+          fps,
+          frame,
+          delay: wordDelay,
+          config: { mass: 1.0, damping: 28, stiffness: 65 },
+        });
+        const translateY = interpolate(p, [0, 1], [14, 0]);
+        const opacity = interpolate(p, [0, 0.7], [0, 1]);
+        return (
+          <div
+            key={i}
+            style={{
+              display: "inline-block",
+              padding: "0.08em 0.15em",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                transform: `translateY(${translateY}px)`,
+                opacity,
+              }}
+            >
+              {word}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const FisheyeText: React.FC<{
+  text: string;
+  delay: number;
+  style?: React.CSSProperties;
+}> = ({ text, delay, style }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const [mapDataUrl, setMapDataUrl] = useState("");
+
+  useEffect(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const imgData = ctx.createImageData(256, 256);
+    const data = imgData.data;
+
+    const cx = 128;
+    const cy = 128;
+    const R = 128;
+
+    for (let y = 0; y < 256; y++) {
+      for (let x = 0; x < 256; x++) {
+        const dx = x - cx;
+        const dy = y - cy;
+        const r = Math.sqrt(dx * dx + dy * dy);
+        const idx = (y * 256 + x) * 4;
+
+        if (r === 0) {
+          data[idx] = 128;
+          data[idx + 1] = 128;
+        } else {
+          const intensity = r < R ? Math.cos((r / R) * Math.PI / 2) : 0;
+          const ux = (dx / R) * intensity;
+          const uy = (dy / R) * intensity;
+
+          data[idx] = Math.max(0, Math.min(255, Math.round(128 + 127 * ux)));
+          data[idx + 1] = Math.max(0, Math.min(255, Math.round(128 + 127 * uy)));
+        }
+        data[idx + 2] = 128;
+        data[idx + 3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    setMapDataUrl(canvas.toDataURL());
+  }, []);
+
+  const progress = spring({
+    fps,
+    frame,
+    delay,
+    config: { mass: 0.9, damping: 15, stiffness: 85 },
+  });
+
+  const displacementScale = interpolate(progress, [0, 0.7, 1], [0, 85, 50]);
+  const textScale = interpolate(progress, [0, 1], [0.82, 1]);
+  const opacity = interpolate(progress, [0, 0.5], [0, 1], {
+    extrapolateRight: "clamp",
+  });
+
+  const filterId = `fisheye-filter-${delay}`;
+
+  return (
+    <div style={{ position: "relative", display: "inline-block", width: "100%" }}>
+      {mapDataUrl && (
+        <svg style={{ position: "absolute", width: 0, height: 0 }}>
+          <defs>
+            <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%">
+              <feImage
+                href={mapDataUrl}
+                result="map"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                preserveAspectRatio="none"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="map"
+                scale={displacementScale}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+        </svg>
+      )}
+      <div
+        style={{
+          ...style,
+          opacity,
+          transform: `scale(${textScale})`,
+          filter: mapDataUrl ? `url(#${filterId})` : undefined,
+          transformOrigin: "center center",
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+};
+
 export const AnimatedText: React.FC<Props> = ({
   text,
   kind,
@@ -101,6 +262,9 @@ export const AnimatedText: React.FC<Props> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  if (kind === "stagger-reveal") {
+    return <StaggeredReveal text={text} delay={delay} style={style} />;
+  }
   if (kind === "typewriter") {
     return (
       <div style={style}>
@@ -125,6 +289,9 @@ export const AnimatedText: React.FC<Props> = ({
       </div>
     );
   }
+  if (kind === "fisheye") {
+    return <FisheyeText text={text} delay={delay} style={style} />;
+  }
 
   let anim: React.CSSProperties = {};
   if (kind === "fade") {
@@ -136,14 +303,12 @@ export const AnimatedText: React.FC<Props> = ({
       }),
     };
   } else if (kind === "slide-up") {
-    // Smooth, no-overshoot rise: critically damped spring for a soft ease-out.
     const p = spring({ fps, frame, delay, config: { mass: 1, damping: 26, stiffness: 92 } });
     anim = {
       opacity: interpolate(p, [0, 0.6], [0, 1], { extrapolateRight: "clamp" }),
       translate: `0px ${interpolate(p, [0, 1], [36, 0])}px`,
     };
   } else if (kind === "spring-in") {
-    // Gentle settle — a touch of scale, minimal bounce.
     const p = spring({ fps, frame, delay, config: { mass: 0.9, damping: 22, stiffness: 108 } });
     anim = {
       opacity: interpolate(p, [0, 0.6], [0, 1], { extrapolateRight: "clamp" }),

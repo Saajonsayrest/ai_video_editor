@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { videoSchema } from "../src/schema";
-import { srtToCaptions, transcribeToCaptions } from "./lib/captions";
+import { captionsToSrt, captionsToVtt, srtToCaptions, transcribeToCaptions } from "./lib/captions";
+import { resolvePublic } from "./lib/media";
 
 /**
  * Attach captions to a props file. By default transcribes each scene's voiceover
@@ -11,13 +12,46 @@ import { srtToCaptions, transcribeToCaptions } from "./lib/captions";
  *   npm run captions                              # transcribe VO/footage per scene
  *   npm run captions -- --srt input/subs.srt      # import into scene 0
  *   npm run captions -- --srt input/subs.srt --scene 2
+ *
+ * Standalone subtitle export — transcribes a file directly, no props.json
+ * needed (e.g. for an ingested YouTube video):
+ *
+ *   npm run captions -- --file input/ingest/x.mp4 --export input/ingest/x.srt
+ *   npm run captions -- --file input/ingest/x.mp4 --export input/ingest/x.vtt --lang multi
  */
 async function main() {
   const args = process.argv.slice(2);
+  const flag = (name: string) => {
+    const i = args.indexOf(name);
+    return i >= 0 ? args[i + 1] : undefined;
+  };
+
+  const sourceFile = flag("--file");
+  const exportFile = flag("--export");
+  if (sourceFile) {
+    const multi = flag("--lang") === "multi";
+    const captions = await transcribeToCaptions(sourceFile, {
+      model: multi ? "small" : undefined,
+      language: multi ? "auto" : undefined,
+    });
+    if (captions.length === 0) {
+      console.error("✗ No speech detected in the audio.");
+      process.exit(1);
+    }
+    if (exportFile) {
+      const text = exportFile.endsWith(".vtt") ? captionsToVtt(captions) : captionsToSrt(captions);
+      fs.writeFileSync(resolvePublic(exportFile), text);
+      console.log(`✓ Transcribed ${captions.length} token(s) → public/${exportFile}`);
+    } else {
+      console.log(JSON.stringify(captions, null, 2));
+    }
+    return;
+  }
+
   const propsFile = "props.json";
   const abs = path.join(process.cwd(), propsFile);
   if (!fs.existsSync(abs)) {
-    console.error("✗ props.json not found — write a spec first.");
+    console.error("✗ props.json not found — write a spec first, or use --file for a standalone transcript.");
     process.exit(1);
   }
   const spec = videoSchema.parse(JSON.parse(fs.readFileSync(abs, "utf8")));

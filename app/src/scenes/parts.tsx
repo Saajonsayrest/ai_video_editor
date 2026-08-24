@@ -25,7 +25,7 @@ export const Eyebrow: React.FC<{
         letterSpacing: 5,
         textTransform: "uppercase",
         color: accent,
-        textShadow: "0 2px 12px rgba(40,24,14,0.35)",
+        textShadow: "0 2px 8px rgba(0,0,0,0.60), 0 4px 16px rgba(0,0,0,0.40)",
       }}
     />
   );
@@ -61,7 +61,7 @@ export const Headline: React.FC<{
       kind={kind}
       delay={delay}
       highlightWord={highlightWord}
-      highlightColor={withAlpha(accent, 0.5)}
+      highlightColor={withAlpha(accent, 0.72)}
       style={{
         fontFamily: t.fonts.heading,
         fontSize: size,
@@ -73,7 +73,7 @@ export const Headline: React.FC<{
         margin: 0,
         color,
         textShadow:
-          "0 2px 10px rgba(40,24,14,0.30), 0 10px 40px rgba(40,24,14,0.28)",
+          "0 2px 8px rgba(0,0,0,0.65), 0 6px 20px rgba(0,0,0,0.45), 0 12px 40px rgba(0,0,0,0.30)",
       }}
     />
   );
@@ -102,7 +102,7 @@ export const Subtitle: React.FC<{
         color: color ?? t.palette.muted,
         maxWidth,
         margin: 0,
-        textShadow: "0 2px 12px rgba(40,24,14,0.35)",
+        textShadow: "0 2px 6px rgba(0,0,0,0.60), 0 4px 12px rgba(0,0,0,0.40)",
       }}
     />
   );

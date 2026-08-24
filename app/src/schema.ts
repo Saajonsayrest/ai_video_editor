@@ -32,6 +32,8 @@ export const TEXT_ANIMATIONS = [
   "spring-in",
   "typewriter",
   "word-highlight",
+  "stagger-reveal",
+  "fisheye",
 ] as const;
 export const TRANSITION_TYPES = [
   "none",
@@ -53,6 +55,8 @@ export const LOGO_POSITIONS = [
   "top-right",
   "bottom-left",
   "bottom-right",
+  "center",
+  "top-center",
 ] as const;
 export const OVERLAY_POSITIONS = [
   "top-left",
@@ -67,7 +71,7 @@ export const mediaLayerSchema = z.object({
   type: z.enum(["none", "image", "video"]).default("none"),
   /** Path under public/ (e.g. "input/clip.mp4") or an https URL. */
   src: z.string().default(""),
-  /** Stock search query — the P5 stock adapter fills `src` from this. */
+  /** Stock search query — the stock adapter fills `src` from this. */
   query: z.string().default(""),
   /** Text-to-media prompt — the (paid, off-by-default) genvideo adapter uses this. */
   prompt: z.string().default(""),
@@ -81,7 +85,7 @@ export const mediaLayerSchema = z.object({
   opacity: z.number().min(0).max(1).default(1),
   /** Darkening overlay for text legibility over media (0 = none). */
   scrim: z.number().min(0).max(1).default(0.35),
-  // --- editing (P2), video only ---
+  // --- editing, video only ---
   /** Seconds to skip from the start of the source. */
   trimStart: z.number().min(0).default(0),
   /** Second in the source to end at (0 = play to the end). */
@@ -92,7 +96,7 @@ export const mediaLayerSchema = z.object({
   muted: z.boolean().default(true),
   /** Clip volume 0–1 when not muted. */
   volume: z.number().min(0).max(1).default(1),
-  // --- aesthetic grade / vertical fill (P8 cozy pack) ---
+  // --- aesthetic grade / vertical fill ---
   /** CSS filter applied to the footage pixels (color grade), e.g.
    * "saturate(1.08) contrast(0.96) brightness(1.05)". Empty ⇒ none. */
   filter: z.string().default(""),
@@ -103,6 +107,11 @@ export const mediaLayerSchema = z.object({
   /** Zoom applied to the sharp layer when blurFill is on (1 = fit width). Higher =
    * bigger subject, less blurred fill. */
   fillZoom: z.number().min(0.5).max(3).default(1),
+  /** Static vertical re-center (% of frame height), applied after fillZoom/cover
+   * scale. Negative shifts the visible crop DOWN the source (crops more off the
+   * top); positive shifts it UP. Use when the source's aspect ratio already
+   * matches the composition (so objectPosition has no slack to reposition). */
+  cropOffsetY: z.number().min(-50).max(50).default(0),
 });
 
 /** A small positioned layer on top of the scene (PiP clip, product shot, badge). */
@@ -114,7 +123,7 @@ export const overlaySchema = z.object({
   width: z.number().min(1).max(100).default(28),
   opacity: z.number().min(0).max(1).default(1),
   radius: z.number().min(0).default(16),
-  // --- editing (P2), for video overlays / picture-in-picture ---
+  // --- editing, for video overlays / picture-in-picture ---
   trimStart: z.number().min(0).default(0),
   trimEnd: z.number().min(0).default(0),
   speed: z.number().min(0.1).max(8).default(1),
@@ -158,6 +167,7 @@ export const musicSchema = z.object({
   fadeOutSeconds: z.number().min(0).default(1.5),
   duckUnderVoice: z.boolean().default(true),
   duckVolume: z.number().min(0).max(1).default(0.28),
+  startFromSeconds: z.number().min(0).default(0),
 });
 
 /** A single caption token in @remotion/captions' Caption shape (word-level from
@@ -213,7 +223,7 @@ export const sceneContentSchema = z.object({
   vizStyle: z.enum(["bars", "mirror", "wave"]).default("mirror"),
 });
 
-/** A tiny cute accent (sparkle / sunflower / heart doodle) that fades in on a
+/** A tiny cute accent (sparkle / doodle) that fades in on a
  * beat and out again. Kept sparse and positioned in empty frame space. */
 export const accentSchema = z.object({
   /** Emoji or short glyph rendered as the accent. */
@@ -242,7 +252,7 @@ export const sceneFxSchema = z.object({
   vignette: z.number().min(0).max(1).default(0),
   /** Soft highlight bloom / glow strength (0–1). */
   bloom: z.number().min(0).max(1).default(0),
-  /** Warm cream soft-light wash strength (0–1). */
+  /** Warm soft-light wash strength (0–1). */
   warmth: z.number().min(0).max(1).default(0),
 });
 
@@ -250,7 +260,7 @@ export const sceneSchema = z.object({
   /** Stable id, used for cache keys + minimal patching across sessions. */
   id: z.string().default(""),
   kind: z.enum(SCENE_KINDS).default("hook"),
-  durationInSeconds: z.number().min(0.1).max(600).default(4),
+  durationInSeconds: z.number().min(0.1).max(600).default(3.5),
   /** Derive this scene's length from its backgroundMedia video (after trim/speed). */
   fitToMedia: z.boolean().default(false),
   /** Any CSS background (solid or gradient). Empty ⇒ derived from the brand palette. */
@@ -263,71 +273,97 @@ export const sceneSchema = z.object({
   logoPosition: z.enum(LOGO_POSITIONS).default("top-right"),
   /** Transition used to ENTER this scene from the previous one (ignored on scene 0). */
   transition: transitionSchema.default({}),
-  textAnimation: z.enum(TEXT_ANIMATIONS).default("fade"),
+  textAnimation: z.enum(TEXT_ANIMATIONS).default("slide-up"),
   content: sceneContentSchema.default({}),
   voiceover: voiceoverSchema.default({}),
   sfx: z.array(sfxSchema).default([]),
   captions: sceneCaptionsSchema.default({}),
-  /** Warm atmospheric post-effects (grain / vignette / bloom / warmth). */
+  /** Atmospheric post-effects (grain / vignette / bloom / warmth). */
   fx: sceneFxSchema.default({}),
-  /** Sparse cute accents that fade in on beats (kept in empty frame space). */
+  /** Accents that fade in on beats. */
   accents: z.array(accentSchema).default([]),
 });
 
+export const paletteSchema = z.object({
+  primary: zColor(),
+  secondary: zColor(),
+  background: zColor(),
+  surface: zColor(),
+  text: zColor(),
+  muted: zColor(),
+  accent: zColor(),
+});
+
+export const fontsSchema = z.object({
+  heading: z.string().default("Poppins"),
+  body: z.string().default("DMSans"),
+});
+
 export const brandSchema = z.object({
-  name: z.string().default(""),
-  /** Path under public/ to a logo (png with transparency preferred). Empty ⇒ no watermark. */
+  name: z.string().default("Acme Studio"),
   logo: z.string().default(""),
-  palette: z
-    .object({
-      primary: zColor().default("#6ea8fe"),
-      secondary: zColor().default("#d68efe"),
-      background: zColor().default("#0b1020"),
-      surface: zColor().default("#161c34"),
-      text: zColor().default("#ffffff"),
-      muted: zColor().default("#9fb0d0"),
-      accent: zColor().default("#6efeb0"),
-    })
-    .default({}),
-  fonts: z
-    .object({
-      heading: z.string().default("Inter"),
-      body: z.string().default("Inter"),
-    })
-    .default({}),
-  /** Default TTS voice id (kokoro), used by the P3 voiceover adapter. */
+  tagline: z.string().default(""),
+  palette: paletteSchema.default({
+    primary: "#4f46e5",
+    secondary: "#06b6d4",
+    background: "#0f172a",
+    surface: "#1e293b",
+    text: "#f8fafc",
+    muted: "#94a3b8",
+    accent: "#38bdf8",
+  }),
+  fonts: fontsSchema.default({}),
   voice: z.string().default("af_heart"),
 });
 
 export const videoSchema = z.object({
-  title: z.string().default("My AI Video"),
-  format: z.enum(FORMATS).default("landscape"),
-  fps: z.number().int().min(1).max(60).default(30),
-  /** 0 ⇒ derive from `format`. Override only for non-standard sizes. */
-  width: z.number().int().min(0).max(4096).default(0),
-  height: z.number().int().min(0).max(4096).default(0),
-  /** Derive composition size from the first video clip (overrides format size). */
+  title: z.string().default("Untitled Video"),
+  format: z.enum(FORMATS).default("portrait"),
+  fps: z.number().int().min(15).max(60).default(30),
+  /** Explicit width override (0 = derived from format). */
+  width: z.number().int().min(0).default(0),
+  /** Explicit height override (0 = derived from format). */
+  height: z.number().int().min(0).default(0),
+  /** When true, composition dimensions follow the first scene's media. */
   matchMediaSize: z.boolean().default(false),
   brand: brandSchema.default({}),
   music: musicSchema.default({}),
   captions: videoCaptionsSchema.default({}),
-  scenes: z.array(sceneSchema).min(1),
+  scenes: z.array(sceneSchema).default([
+    {
+      id: "scene-1",
+      kind: "hook",
+      durationInSeconds: 3.5,
+      content: {
+        eyebrow: "Introducing",
+        title: "Declarative Video Editing",
+        subtitle: "Built with Remotion & React",
+      },
+    },
+  ]),
 });
 
-export type MediaLayer = z.infer<typeof mediaLayerSchema>;
-export type Overlay = z.infer<typeof overlaySchema>;
-export type SceneTransition = z.infer<typeof transitionSchema>;
-export type SceneContent = z.infer<typeof sceneContentSchema>;
-export type Voiceover = z.infer<typeof voiceoverSchema>;
-export type Sfx = z.infer<typeof sfxSchema>;
-export type Accent = z.infer<typeof accentSchema>;
-export type SceneFx = z.infer<typeof sceneFxSchema>;
-export type MusicProps = z.infer<typeof musicSchema>;
-export type VideoCaptions = z.infer<typeof videoCaptionsSchema>;
-export type SceneProps = z.infer<typeof sceneSchema>;
-export type BrandProps = z.infer<typeof brandSchema>;
-export type VideoProps = z.infer<typeof videoSchema>;
 export type Format = (typeof FORMATS)[number];
 export type SceneKind = (typeof SCENE_KINDS)[number];
 export type TextAnimationKind = (typeof TEXT_ANIMATIONS)[number];
 export type TransitionType = (typeof TRANSITION_TYPES)[number];
+export type TransitionDirection = (typeof TRANSITION_DIRECTIONS)[number];
+export type MediaLayer = z.infer<typeof mediaLayerSchema>;
+export type Overlay = z.infer<typeof overlaySchema>;
+export type Transition = z.infer<typeof transitionSchema>;
+export type SceneTransition = z.infer<typeof transitionSchema>;
+export type Voiceover = z.infer<typeof voiceoverSchema>;
+export type Sfx = z.infer<typeof sfxSchema>;
+export type Music = z.infer<typeof musicSchema>;
+export type MusicProps = z.infer<typeof musicSchema>;
+export type CaptionToken = z.infer<typeof captionSchema>;
+export type SceneCaptions = z.infer<typeof sceneCaptionsSchema>;
+export type VideoCaptions = z.infer<typeof videoCaptionsSchema>;
+export type SceneContent = z.infer<typeof sceneContentSchema>;
+export type Accent = z.infer<typeof accentSchema>;
+export type SceneFx = z.infer<typeof sceneFxSchema>;
+export type SceneProps = z.infer<typeof sceneSchema>;
+export type Palette = z.infer<typeof paletteSchema>;
+export type Fonts = z.infer<typeof fontsSchema>;
+export type BrandProps = z.infer<typeof brandSchema>;
+export type VideoProps = z.infer<typeof videoSchema>;
